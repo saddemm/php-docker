@@ -1,0 +1,45 @@
+version:  '3.5'
+
+services:
+  db:
+    container_name : ecolejp_db
+    image: mysql:5.7
+    volumes :
+      - dbdata:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: my_secret_password
+
+  phpmyadmin:
+    container_name : academix_myadmin
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - "9702:80"
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+
+  nginx:
+    container_name : academix_nginx
+    build:
+      context: ./docker/nginx
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 2525:80
+    depends_on:
+      - php
+
+  php:
+    container_name : ecolejp_php
+    build:
+      context: ./docker/php
+    volumes:
+      - .:/var/www
+volumes:
+  dbdata:
